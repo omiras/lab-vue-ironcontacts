@@ -6,37 +6,15 @@ export default {
   data() {
     return {
       hiddenContacts: contacts.slice(5),
-      visibleContacts: contacts.slice(0, 5),
-      orderCriteria: ''
+      visibleContacts: contacts.slice(0, 5)
     }
   },
   methods: {
     addRandomContact() {
-      // Random entre 0 y todos los contactos que quedan por mostrar
       const index = Math.floor(Math.random() * this.hiddenContacts.length);
-      // Añadimos el contacto afortunado
+      console.log(index);
       this.visibleContacts.push(this.hiddenContacts[index]);
-      // Eliminamos el contacto de la lista de los contactos por mostrar
       this.hiddenContacts.splice(index, 1);
-    },
-  },
-  computed: {
-    getContacts() {
-
-      if (this.orderCriteria == 'name') {
-        console.log('sort by name')
-        this.visibleContacts.sort((c1, c2) => {
-          return (c1.name > c2.name) ? 1 : -1;
-        })
-      }
-
-      else if (this.orderCriteria == 'popularity') {
-        console.log('sort by pop')
-        this.visibleContacts.sort((c1, c2) => {
-          return c2.popularity - c1.popularity;
-        })
-      }
-      return this.visibleContacts;
     }
   }
 }
@@ -48,8 +26,6 @@ export default {
     <h1>SinguContacts</h1>
     <div class="container">
       <button @click="addRandomContact">Get Random Contact</button>
-      <button @click="orderCriteria = 'name'">Sort By Name</button>
-      <button @click="orderCriteria = 'popularity'">Sort By Popularity</button>
     </div>
     <table>
       <thead>
@@ -62,7 +38,7 @@ export default {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="contact in getContacts" :key="contact.id">
+        <tr v-for="contact in visibleContacts" :key="contact.id">
           <td>
             <img class="photo" :src="contact.pictureUrl" />
           </td>
