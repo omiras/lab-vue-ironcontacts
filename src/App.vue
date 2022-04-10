@@ -5,38 +5,51 @@ import contacts from "./contacts.json";
 export default {
   data() {
     return {
-      hiddenContacts: contacts.slice(5),
-      visibleContacts: contacts.slice(0, 5),
+      contacts: [],
       orderCriteria: ''
     }
   },
+  created() {
+    // Esto es un gusto personal. Me gusta transformar y/o cargar los datos en este hook, pero no veo ninguna razón para no hacerlo directamente en data(). Quizás, como aquí he tenido que poner bastante código, considero que queda más claro hacerlo aquí.
+
+    // Estrategia sugerida por Juan Pablo: transformamos los datos añadiendo un campo nuevo para indicar cuando un contacto ha de ser visible o no, en vez de mantener dos arrays o hacer otros tipos de complicaciones. Reescribir los datos de entrada con un formato que nos sea más fácil de manejar es una técnica ampliamente utilizada.
+
+    // Añadimos un campo nuevo .isVisible; que nos indicará si debemos mostrar el contacto o no. Solo vamos a mostrar los 5 primeros.
+
+    this.contacts = contacts.map((contact, index) => {
+      return {
+        ...contact,
+        isVisible: index <= 4
+      }
+    });
+  },
   methods: {
     addRandomContact() {
-      // Random entre 0 y todos los contactos que quedan por mostrar
-      const index = Math.floor(Math.random() * this.hiddenContacts.length);
-      // Añadimos el contacto afortunado
-      this.visibleContacts.push(this.hiddenContacts[index]);
-      // Eliminamos el contacto de la lista de los contactos por mostrar
-      this.hiddenContacts.splice(index, 1);
+      // Random entre 0 y todos los contactos que quedan por mostrar (campo isVisible es false)
+      const hiddenContacts = this.contacts.filter(contact => !contact.isVisible)
+      const index = Math.floor(Math.random() * hiddenContacts.length);
+      // Ahora dicho contacto debe ser visible
+      this.contacts[index].isVisible = true;
     },
+    removeContact(contact) {
+      this.contacts = this.contacts.filter(c => c.id != contact.id);
+    }
   },
   computed: {
     getContacts() {
 
       if (this.orderCriteria == 'name') {
-        console.log('sort by name')
-        this.visibleContacts.sort((c1, c2) => {
+        this.contacts.sort((c1, c2) => {
           return (c1.name > c2.name) ? 1 : -1;
         })
       }
 
       else if (this.orderCriteria == 'popularity') {
-        console.log('sort by pop')
-        this.visibleContacts.sort((c1, c2) => {
+        this.contacts.sort((c1, c2) => {
           return c2.popularity - c1.popularity;
         })
       }
-      return this.visibleContacts;
+      return this.contacts.filter(contact => contact.isVisible);
     }
   }
 }
@@ -68,29 +81,22 @@ export default {
           </td>
           <td>{{ contact.name }}</td>
           <td>{{ contact.popularity.toFixed(2) }}</td>
+          <td><button @click="removeContact(contact)">Remove</button></td>
           <td>
-            <img
-              v-if="contact.wonOscar"
-              src="https://github.githubassets.com/images/icons/emoji/unicode/1f3c6.png"
-              alt="oscar trophy"
-            />
+            <img v-if="contact.wonOscar" src="https://github.githubassets.com/images/icons/emoji/unicode/1f3c6.png"
+              alt="oscar trophy" />
           </td>
           <td>
-            <img
-              v-if="contact.wonEmmy"
-              src="https://github.githubassets.com/images/icons/emoji/unicode/1f3c6.png"
-              alt="emmy trophy"
-            />
+            <img v-if="contact.wonEmmy" src="https://github.githubassets.com/images/icons/emoji/unicode/1f3c6.png"
+              alt="emmy trophy" />
           </td>
         </tr>
       </tbody>
-    </table>
-  </div>
+    </table>  </div>
 </template>
 
 <!-- estilos globales de la aplicación -->
-<style>
-#app {
+<style>#app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -101,5 +107,4 @@ export default {
 
 .photo {
   width: 100px;
-}
-</style>
+}</style>
